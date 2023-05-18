@@ -4,7 +4,7 @@
 // if posiitve just spit it out 
 
 push static 0
-push temp 0
+push constant 0
 lt                     // check if x < 0
 if-goto IF_TRUE
 
@@ -16,8 +16,9 @@ goto END
 // if negative, then negate and spit it out 
 
 label IF_TRUE          // if x < 0, negate and return x
+push constant 0
 push static 0
-neg
+sub
 pop static 1
 goto END       
 
