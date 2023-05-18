@@ -1,9 +1,26 @@
 // Calculates y = |x|
 // x & y are static variables
 
-// Put your code here.
+// if posiitve just spit it out 
 
+push constant 0
+push static 0
 
+lt                     // check if n < 0
+if-goto IF_TRUE
+goto IF_FALSE
+
+label IF_TRUE          // if n < 0, negate and return x
+pop static 1        
+return
+
+// if neg, then negate and spit it out 
+
+label IF_FALSE          // if n < 0, negate and return x
+push static 0
+neg
+pop static 1        
+return
 
 label END
 goto END
