@@ -9,6 +9,7 @@ lt                     // check if x < 0
 if-goto IF_TRUE
 
 // if x > 0, return x
+push static 0
 pop static 1        
 goto END
 
