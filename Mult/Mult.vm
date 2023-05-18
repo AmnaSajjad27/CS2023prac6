@@ -2,9 +2,78 @@
 // a is a local variable
 // x & y are static variables
 
-// Put your code here.
+// if either x or y is zero, a will be zero
+push constant 0
+push static 0
+eq
+if-goto EQUAL
+
+label EQUAL
+push constant 0
+pop local 0
+goto END
+
+// if x or y is neagtive 
+// absolute it, add it then negate it and pop it 
+// check less than 
+
+push constant 0
+push static 0
+lt
+if-goto LOOP_NEG_X
+
+push constant 0
+push static 1
+lt
+if-goto LOOP_NEG_Y
 
 
+
+label LOOP_NEG_X
+// abs it 
+push static 0
+neg
+pop static 0
+
+
+label LOOP_NEG_Y
+push static 1
+neg
+pop static 1
+
+
+
+// repeated addition in a loop
+
+push temp 0
+pop local 0
+
+label LOOP_START
+// if y <= 0
+
+push static 1
+push temp 0
+lt
+if-goto END
+
+// result + static 0
+push local 0
+push static 0
+add
+
+// result = result + static 0
+pop local 0
+
+// y = y - 1 
+push static 1
+push temp 1
+sub
+pop static 1
+
+// continoue next iteriation
+goto LOOP_START
 
 label END
-goto END
+push local 0
+pop local 0
+// goto END

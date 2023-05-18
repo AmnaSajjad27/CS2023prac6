@@ -11,7 +11,7 @@ if-goto IF_TRUE
 // if x > 0, return x
 push static 0
 pop static 1        
-goto END
+// goto END
 
 // if negative, then negate and spit it out 
 
