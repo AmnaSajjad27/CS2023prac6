@@ -1,5 +1,56 @@
 // Contains a function ArrMax.arrMax that finds and returns the largest element in the array a of length b.
 // a & b are both supplied as arguments
 
-// Put your code here.
 
+// ArrMax.arrMax is the name of the function
+// m is a pointer to the Array
+// n is the number of elements in the Array
+// The pointer and that segments should be used to access the array. See section 11.1.6 in the text book.
+
+function ArrMax.arrMax 2
+// argument 0 is a pointer to the array and argument 1 is lenght of the array
+
+push argument 0 // address of index 0 in array
+pop pointer 1   // store address of index 0 in pointer 1
+
+push that 0
+// we gonna hold our max value in local 0
+pop local 0
+
+// counter for our index 
+push constant 1
+pop local 1
+
+label LOOP
+// for loop (for int i = 1; i < lenght of array; i++)
+push local 1
+push argument 1
+eq
+if-goto END
+
+// increment and update counter held in pointer 1
+push argument 0
+push local 1
+add
+pop pointer 1
+
+// if that 0 < local 0 i.e. current max value
+push that 0
+push local 0
+lt 
+if-goto CURRENT
+// save it in local 0
+push that 0
+pop local 0
+
+label CURRENT
+push local 1
+push constant 1
+add 
+pop local 1
+goto LOOP
+
+label END
+// return the current max 
+push local 0
+return 
