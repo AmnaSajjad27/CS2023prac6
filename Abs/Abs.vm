@@ -3,20 +3,20 @@
 
 // if posiitve just spit it out 
 
-push constant 0
 push static 0
+push constant 0
 
-lt                     // check if n < 0
+lt                     // check if x < 0
 if-goto IF_TRUE
 goto IF_FALSE
 
-label IF_TRUE          // if n < 0, negate and return x
+label IF_TRUE          // if x < 0, negate and return x
 pop static 1        
 return
 
-// if neg, then negate and spit it out 
+// if negative, then negate and spit it out 
 
-label IF_FALSE          // if n < 0, negate and return x
+label IF_FALSE          // if x < 0, negate and return x
 push static 0
 neg
 pop static 1        
