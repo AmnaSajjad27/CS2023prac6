@@ -24,8 +24,71 @@ string VMTranslator::vm_push(string segment, int offset){
 }
 
 /** Generate Hack Assembly code for a VM pop operation */
-string VMTranslator::vm_pop(string segment, int offset){    
-    return "";
+string VMTranslator::vm_pop(string segment, int offset)
+{
+    string translate = "";
+    translate += "" + segment + to_string(offset) + "\n";
+    if (segment == "constant")
+    {
+        // load index into A
+        translate += "@" + to_string(offset) + "\n";
+        // move to D
+        translate += "D=A\n";
+        // load 0 into A (M[0] = SP)
+        translate += "@SP\n";
+        // load SP
+        translate += "A=M\n";
+        // chuck D onto da stack 
+        translate += "M=D\n";
+        // update SP
+        translate += "@SP\n";
+        // increment P
+        translate += "M=M+1\n"
+    }
+    else if (segment == "static")
+    {
+        translate += "@" + to_string(offset + 16) + "\n";
+        translate += "D=M\n";
+        translate += "@SP\n";
+        translate += "A=M\n"; 
+        translate += "M=D\n";
+        translate += "@SP\n";
+        translate += "M=M+1\n"; 
+    }
+    else 
+    {
+        translate += "@" + to_string(offset) + "\n"; // get value into D
+        translate += "D=A\n";
+        
+        if (segment == "this") {
+            translate += "@THIS\n";
+            translate += "A=M+D\n";
+        } else if (segment == "that") {
+            translate += "@THAT\n";
+            translate += "A=M+D\n";
+        } else if (segment == "argument") {
+            translate += "@ARG\n";
+            translate += "A=M+D\n";
+        } else if (segment == "local") {
+            translate += "@LCL\n";
+            translate += "A=M+D\n";
+        } else if (segment == "temp") {
+            translate += "@5\n";
+            translate += "A=A+D\n";
+        } else if (segment == "pointer") {
+            translate += "@3\n";
+            translate += "A=A+D\n";
+        }
+
+        translate += "D=M\n";
+        translate += "@SP\n"; // put it onto the stack
+        translate += "A=M\n";
+        translate += "M=D\n";
+        translate += "@SP\n"; // increment the stack pointer
+        translate += "M=M+1\n";
+    }
+
+    return translate;
 }
 
 /** Generate Hack Assembly code for a VM add operation */
