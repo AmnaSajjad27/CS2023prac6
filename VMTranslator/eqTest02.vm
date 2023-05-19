@@ -1,0 +1,3 @@
+push temp 0
+push temp 1
+eq 
