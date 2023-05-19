@@ -1,0 +1,31 @@
+@8	// push constant 8
+D=A
+@SP
+A=M
+M=D
+@SP
+M=M+1
+@1	// push constant 1
+D=A
+@SP
+A=M
+M=D
+@SP
+M=M+1
+@SP	// lt
+AM=M-1
+D=M
+A=A-1
+D=M-D
+@LT.true_1
+D;JLT
+@SP
+A=M-1
+M=0
+@LT.skip_1
+0;JMP
+(LT.true_1)
+@SP
+A=M-1
+M=-1
+(LT.skip_1)
