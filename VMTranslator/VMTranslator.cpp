@@ -318,7 +318,7 @@ string VMTranslator::vm_not()
 /** Generate Hack Assembly code for a VM label operation */
 string VMTranslator::vm_label(string label){
     string out;
-    out += label + "\n";
+    out += label + "\t";
 	return out;
 }
 
