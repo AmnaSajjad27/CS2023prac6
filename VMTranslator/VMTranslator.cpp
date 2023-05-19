@@ -385,11 +385,137 @@ string VMTranslator::vm_function(string function_name, int n_vars)
 }
 
 /** Generate Hack Assembly code for a VM call operation */
-string VMTranslator::vm_call(string function_name, int n_args){
-    return "";
+string VMTranslator::vm_call(string function_name, int n_args)
+{
+    helper out;
+    string lID;
+
+
+	out.comment("call "+function_name);
+	out.comment("store callers pointers");
+	// R13 = SP, temporarily store the stack address in R13
+	out.ins(	"@SP"	 );
+	out.ins(	"D=M"	 );
+	out.ins(	"@R13" );
+	out.ins(	"M=D"  );
+	// *(SP) = @RET
+	out.ins(	"@RET."+lID		);
+	out.ins(	"D=A"	 );
+	out.ins(	"@SP"	 );
+	out.ins(	"A=M"	 );
+	out.ins(	"M=D"	 );
+	// increment stack pointer
+	out.ins(	"@SP"	 );
+	out.ins(	"M=M+1"	);
+	// *(SP) = LCL
+	out.ins(	"@LCL","store LCL on stack"  );
+	out.ins(	"D=M" 	);
+	out.ins(	"@SP" 	);
+	out.ins(	"A=M" 	);
+	out.ins(	"M=D" 	);
+	// increment stack pointer
+	out.ins(	"@SP"	 );
+	out.ins(	"M=M+1"	);
+	// *(SP) = ARG
+	out.ins(	"@ARG","store ARG on stack"  );
+	out.ins(	"D=M" 	);
+	out.ins(	"@SP" 	);
+	out.ins(	"A=M" 	);
+	out.ins(	"M=D" 	);
+	// increment stack pointer
+	out.ins(	"@SP"	 );
+	out.ins(	"M=M+1"	);
+	// *(SP) = THIS
+	out.ins(	"@THIS","store THIS on stack"  );
+	out.ins(	"D=M" 	);
+	out.ins(	"@SP" 	);
+	out.ins(	"A=M" 	);
+	out.ins(	"M=D" 	);
+	// increment stack pointer
+	out.ins(	"@SP"	 );
+	out.ins(	"M=M+1"	);
+	// *(SP) = THAT
+	out.ins(	"@THAT","store THAT on stack"  );
+	out.ins(	"D=M" 	);
+	out.ins(	"@SP" 	);
+	out.ins(	"A=M" 	);
+	out.ins(	"M=D" 	);
+	// increment stack pointer
+	out.ins(	"@SP"	 );
+	out.ins(	"M=M+1"	);
+
+	out.comment("setup ARG and LCL for callee");
+	// ARG = R13 - n_vars
+	out.ins(	"@R13","update ARG"  );
+	out.ins(	"D=M" 		);
+	out.ins(	"@"+to_string(n_args) );
+	out.ins(	"D=D-A" 	);
+	out.ins(	"@ARG" 		);
+	out.ins(	"M=D"			);
+	// LCL = SP
+	out.ins(	"@SP","update LCL"  );
+	out.ins(	"D=M" 		);
+	out.ins(	"@LCL" 		);
+	out.ins(	"M=D" 		);
+	out.ins(	"@"+fnLabelEncode(function_name) 	);
+	out.ins(	"0;JMP"		);
+	out.ins(	"(RET."+lID+")"	);
+
+	return out.str();
 }
 
 /** Generate Hack Assembly code for a VM return operation */
-string VMTranslator::vm_return(){
-    return "";
+string VMTranslator::vm_return()
+{
+    helper out;
+	out.comment("returning to caller");
+	// R13 = *(LCL - 5)
+	out.ins(	"@LCL"	);
+	out.ins(	"D=M"	  );
+	out.ins(	"@5"	  );
+	out.ins(	"A=D-A"	);
+	out.ins(	"D=M"	  );
+	out.ins(	"@R13"	);
+	out.ins(	"M=D"	  );
+	// *(ARG) = *(SP - 1)
+	out.ins(	"@SP"		);
+	out.ins(	"A=M-1"	);
+	out.ins(	"D=M"	  );
+	out.ins(	"@ARG"	);
+	out.ins(	"A=M"	  );
+	out.ins(	"M=D"	  );
+	// SP = ARG + 1
+	out.ins(	"D=A+1"	 );
+	out.ins(	"@SP"	   );
+	out.ins(	"M=D"	   );
+	// THAT = *(LCL - 1), LCL = LCL - 1
+	out.ins(	"@LCL"	  );
+	out.ins(	"AM=M-1"	);
+	out.ins(	"D=M"	  	);
+	out.ins(	"@THAT"	  );
+	out.ins(	"M=D"	  	);
+	// THIS = *(LCL - 1), LCL = LCL - 1
+	out.ins(	"@LCL"	  );
+	out.ins(	"AM=M-1"	);
+	out.ins(	"D=M"	  	);
+	out.ins(	"@THIS"	  );
+	out.ins(	"M=D"	  	);
+	// ARG = *(LCL - 1), LCL = LCL - 1
+	out.ins(	"@LCL"	  );
+	out.ins(	"AM=M-1"	);
+	out.ins(	"D=M"	  	);
+	out.ins(	"@ARG"	  );
+	out.ins(	"M=D"	  	);
+	// LCL = *(LCL - 1)
+	out.ins(	"@LCL"	  );
+	out.ins(	"A=M-1"		);
+	out.ins(	"D=M"	  	);
+	out.ins(	"@LCL"	  );
+	out.ins(	"M=D"	  	);
+	// jump back
+	out.ins(	"@R13", "jump back to caller"	);
+	out.ins(	"A=M"			);
+	out.ins(	"0;JMP"		);
+
+	return out.str();
 }
