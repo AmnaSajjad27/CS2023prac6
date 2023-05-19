@@ -1,0 +1,31 @@
+@3	// push constant 3
+D=A
+@SP
+A=M
+M=D
+@SP
+M=M+1
+@4	// push constant 4
+D=A
+@SP
+A=M
+M=D
+@SP
+M=M+1
+@SP	// gt
+AM=M-1
+D=M
+A=A-1
+D=M-D
+@GT.true_1
+D;JGT
+@SP
+A=M-1
+M=0
+@GT.skip_1
+0;JMP
+(GT.true_1)
+@SP
+A=M-1
+M=-1
+(GT.skip_1)
