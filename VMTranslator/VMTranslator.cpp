@@ -19,121 +19,300 @@ VMTranslator::~VMTranslator() {
 }
 
 /** Generate Hack Assembly code for a VM push operation */
-string VMTranslator::vm_push(string segment, int offset){
-    return "";
+string VMTranslator::vm_push(string segment, int offset)
+{
+    string trans = "";
+    trans += "// push " + segment + to_string(offset) + "\n";
+    if (segment == "constant") {
+        trans += "@" + to_string(offset) + "\n"; // load index into A
+        trans += "D=A\n"; // move it to D
+        trans += "@SP\n"; // load 0 into A (M[0] contains stack pointer)
+        trans += "A=M\n"; // load stack pointer
+        trans += "M=D\n"; // put D onto stack
+        trans += "@SP\n"; // load stack pointer address into A
+        trans += "M=M+1\n"; // increment stack pointer
+    } else if (segment == "static") {
+        trans += "@" + to_string(offset + 16) + "\n";
+        trans += "D=M\n";
+        trans += "@SP\n";
+        trans += "A=M\n"; 
+        trans += "M=D\n";
+        trans += "@SP\n";
+        trans += "M=M+1\n";
+    } else {
+        trans += "@" + to_string(offset) + "\n"; // get value into D
+        trans += "D=A\n";
+        
+        if (segment == "this") {
+            trans += "@THIS\n";
+            trans += "A=M+D\n";
+        } else if (segment == "that") {
+            trans += "@THAT\n";
+            trans += "A=M+D\n";
+        } else if (segment == "argument") {
+            trans += "@ARG\n";
+            trans += "A=M+D\n";
+        } else if (segment == "local") {
+            trans += "@LCL\n";
+            trans += "A=M+D\n";
+        } else if (segment == "temp") {
+            trans += "@5\n";
+            trans += "A=A+D\n";
+        } else if (segment == "pointer") {
+            trans += "@3\n";
+            trans += "A=A+D\n";
+        }
+
+        trans += "D=M\n";
+        trans += "@SP\n"; // put it onto the stack
+        trans += "A=M\n";
+        trans += "M=D\n";
+        trans += "@SP\n"; // increment the stack pointer
+        trans += "M=M+1\n";
+    }
+    
+    return trans;
 }
 
 /** Generate Hack Assembly code for a VM pop operation */
 string VMTranslator::vm_pop(string segment, int offset)
 {
-    string translate = "";
-    translate += "" + segment + to_string(offset) + "\n";
-    if (segment == "constant")
-    {
-        // load index into A
-        translate += "@" + to_string(offset) + "\n";
-        // move to D
-        translate += "D=A\n";
-        // load 0 into A (M[0] = SP)
-        translate += "@SP\n";
-        // load SP
-        translate += "A=M\n";
-        // chuck D onto da stack 
-        translate += "M=D\n";
-        // update SP
-        translate += "@SP\n";
-        // increment P
-        translate += "M=M+1\n"
-    }
-    else if (segment == "static")
-    {
-        translate += "@" + to_string(offset + 16) + "\n";
-        translate += "D=M\n";
-        translate += "@SP\n";
-        translate += "A=M\n"; 
-        translate += "M=D\n";
-        translate += "@SP\n";
-        translate += "M=M+1\n"; 
-    }
-    else 
-    {
-        translate += "@" + to_string(offset) + "\n"; // get value into D
-        translate += "D=A\n";
-        
+    string trans = "";
+    trans += "// pop " + segment + to_string(offset) + "\n";
+    if (segment == "static") {
+        trans += "@SP\n"; // pop value into D
+        trans += "AM=M-1\n";
+        trans += "D=M\n";
+        trans += "@" + to_string(16 + offset) + "\n";
+        trans += "M=D\n";
+    } else {
+        trans += "@" + to_string(offset) + "\n"; // get address into R13
+        trans += "D=A\n";
+
         if (segment == "this") {
-            translate += "@THIS\n";
-            translate += "A=M+D\n";
+            trans += "@THIS\n";
+            trans += "D=M+D\n";
+            trans += "@R13\n";
+            trans += "M=D\n";
+            trans += "@SP\n"; // pop value into D
+            trans += "AM=M-1\n";
+            trans += "D=M\n";
+            trans += "@R13\n"; // address back in A (no touchy D)
+            trans += "A=M\n";
+            trans += "M=D\n";
         } else if (segment == "that") {
-            translate += "@THAT\n";
-            translate += "A=M+D\n";
+            trans += "@THAT\n";
+            trans += "D=M+D\n"; 
+            trans += "@R13\n";
+            trans += "M=D\n";
+            trans += "@SP\n"; // pop value into D
+            trans += "AM=M-1\n";
+            trans += "D=M\n";
+            trans += "@R13\n"; // address back in A (no touchy D)
+            trans += "A=M\n";
+            trans += "M=D\n";
         } else if (segment == "argument") {
-            translate += "@ARG\n";
-            translate += "A=M+D\n";
+            trans += "@ARG\n";
+            trans += "D=M+D\n"; 
+            trans += "@R13\n";
+            trans += "M=D\n";
+            trans += "@SP\n"; // pop value into D
+            trans += "AM=M-1\n";
+            trans += "D=M\n";
+            trans += "@R13\n"; // address back in A (no touchy D)
+            trans += "A=M\n";
+            trans += "M=D\n";
         } else if (segment == "local") {
-            translate += "@LCL\n";
-            translate += "A=M+D\n";
-        } else if (segment == "temp") {
-            translate += "@5\n";
-            translate += "A=A+D\n";
+            trans += "@LCL\n";
+            trans += "D=M+D\n"; 
+            trans += "@R13\n";
+            trans += "M=D\n";
+            trans += "@SP\n"; // pop value into D
+            trans += "AM=M-1\n";
+            trans += "D=M\n";
+            trans += "@R13\n"; // address back in A (no touchy D)
+            trans += "A=M\n";
+            trans += "M=D\n";
         } else if (segment == "pointer") {
-            translate += "@3\n";
-            translate += "A=A+D\n";
+            trans += "@3\n";
+            trans += "D=A+D\n"; 
+            trans += "@R13\n";
+            trans += "M=D\n";
+            trans += "@SP\n"; // pop value into D
+            trans += "AM=M-1\n";
+            trans += "D=M\n";
+            trans += "@R13\n"; // address back in A (no touchy D)
+            trans += "A=M\n";
+            trans += "M=D\n";
+        } else if (segment == "temp") {
+            trans += "@5\n";
+            trans += "D=A+D\n"; 
+            trans += "@R13\n";
+            trans += "M=D\n";
+            trans += "@SP\n"; // pop value into D
+            trans += "AM=M-1\n";
+            trans += "D=M\n";
+            trans += "@R13\n"; // address back in A (no touchy D)
+            trans += "A=M\n";
+            trans += "M=D\n";
         }
-
-        translate += "D=M\n";
-        translate += "@SP\n"; // put it onto the stack
-        translate += "A=M\n";
-        translate += "M=D\n";
-        translate += "@SP\n"; // increment the stack pointer
-        translate += "M=M+1\n";
     }
 
-    return translate;
+    return trans;
 }
 
 /** Generate Hack Assembly code for a VM add operation */
-string VMTranslator::vm_add(){
-    return "";
+string VMTranslator::vm_add()
+{
+    string trans = "";
+    trans += "// add \n";
+    trans += "@SP\n"; // pop first value into D
+    trans += "AM=M-1\n";
+    trans += "D=M\n";
+    trans += "@SP\n"; // pop second value into M
+    trans += "AM=M-1\n"; 
+    trans += "M=D+M\n"; // push sum onto M
+    trans += "@SP\n";
+    trans += "M=M+1\n"; 
+    return trans;    
 }
 
 /** Generate Hack Assembly code for a VM sub operation */
-string VMTranslator::vm_sub(){
-    return "";
+string VMTranslator::vm_sub()
+{
+    string trans = "";
+    trans += "// sub \n";
+    trans += "@SP\n"; // pop first value into D
+    trans += "AM=M-1\n";
+    trans += "D=M\n"; 
+    trans += "@SP\n"; // pop second value into M
+    trans += "AM=M-1\n"; 
+    trans += "M=M-D\n"; // push difference onto M
+    trans += "@SP\n";
+    trans += "M=M+1\n"; 
+    return trans;
 }
 
 /** Generate Hack Assembly code for a VM neg operation */
-string VMTranslator::vm_neg(){
-    return "";
+string VMTranslator::vm_neg()
+{
+    string trans = "";
+    trans += "// neg \n";
+    trans += "@SP\n"; // get (not pop) value into M
+    trans += "A=M-1\n"; 
+    trans += "M=-M\n"; // and negate it 
+    return trans;
 }
 
 /** Generate Hack Assembly code for a VM eq operation */
-string VMTranslator::vm_eq(){
-    return "";
+string VMTranslator::vm_eq()
+{
+    string trans = "";
+    static int count = 0;
+    string label = to_string(count);
+    count++;
+    trans += "// eq " + label + "\n";
+    trans += "@SP\n"; // pop first value into D
+    trans += "AM=M-1\n";
+    trans += "D=M\n";
+    trans += "@SP\n"; // get second value into M
+    trans += "A=M-1\n";
+    trans += "D=M-D\n"; // D = older value - newer
+    trans += "M=-1\n"; // tentatively put true on stack
+    trans += "@eqTrue" + label + "\n"; // and jump to end if so
+    trans += "D;JEQ\n";
+    trans += "@SP\n"; // set to false otherwise
+    trans += "A=M-1\n";
+    trans += "M=0\n";
+    trans += "(eqTrue" + label + ")\n";
+    return trans;
 }
 
 /** Generate Hack Assembly code for a VM gt operation */
-string VMTranslator::vm_gt(){
-    return "";
+string VMTranslator::vm_gt()
+{
+    string trans = "";
+    static int count = 0;
+    string label = to_string(count);
+    count++;
+    trans += "// gt " + label + "\n";
+    trans += "@SP\n"; // pop first value into D
+    trans += "AM=M-1\n";
+    trans += "D=M\n";
+    trans += "@SP\n"; // get second value into M
+    trans += "A=M-1\n";
+    trans += "D=M-D\n"; // D = older value - newer
+    trans += "M=-1\n"; // tentatively put true on stack
+    trans += "@gtTrue" + label + "\n"; // and jump to end if so
+    trans += "D;JGT\n";
+    trans += "@SP\n"; // set to false otherwise
+    trans += "A=M-1\n";
+    trans += "M=0\n";
+    trans += "(gtTrue" + label + ")\n";
+    return trans;
 }
 
 /** Generate Hack Assembly code for a VM lt operation */
-string VMTranslator::vm_lt(){
-    return "";
+string VMTranslator::vm_lt()
+{
+    string trans = "";
+    static int count = 0;
+    string label = to_string(count);
+    count++;
+    trans += "// lt " + label + "\n";
+    trans += "@SP\n"; // pop first value into D
+    trans += "AM=M-1\n";
+    trans += "D=M\n"; 
+    trans += "@SP\n"; // get second value into M
+    trans += "A=M-1\n";
+    trans += "D=M-D\n"; // D = older value - newer
+    trans += "M=-1\n"; // tentatively put true on stack
+    trans += "@ltTrue" + label + "\n"; // and jump to end if so
+    trans += "D;JLT\n";
+    trans += "@SP\n"; // set to false otherwise
+    trans += "A=M-1\n";
+    trans += "M=0\n"; 
+    trans += "(ltTrue" + label + ")\n";
+    return trans;
 }
 
 /** Generate Hack Assembly code for a VM and operation */
-string VMTranslator::vm_and(){
-    return "";
+string VMTranslator::vm_and()
+{
+    string trans = "";
+    trans += "// and\n";
+    trans += "@SP\n"; // pop first value into D
+    trans += "AM=M-1\n";
+    trans += "D=M\n";
+    trans += "@SP\n"; // get second value into M
+    trans += "A=M-1\n";
+    trans += "M=D&M\n"; // put result back on stack
+    return trans;
 }
 
 /** Generate Hack Assembly code for a VM or operation */
-string VMTranslator::vm_or(){
-    return "";
+string VMTranslator::vm_or()
+{
+    string trans = "";
+    trans += "// or\n";
+    trans += "@SP\n"; // pop first value into D
+    trans += "AM=M-1\n";
+    trans += "D=M\n"; 
+    trans += "@SP\n"; // get second value into M
+    trans += "A=M-1\n";
+    trans += "M=D|M\n"; // put result back on stack
+    return trans;
 }
 
 /** Generate Hack Assembly code for a VM not operation */
-string VMTranslator::vm_not(){
-    return "";
+string VMTranslator::vm_not()
+{
+    string trans = "";
+    trans += "// not\n";
+    trans += "@SP\n"; // get (not pop) value into M
+    trans += "A=M-1\n"; 
+    trans += "M=!M\n"; // and negate it 
+    return trans;
 }
 
 /** Generate Hack Assembly code for a VM label operation */
