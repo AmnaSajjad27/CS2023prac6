@@ -1,6 +1,7 @@
 #include <string>
 
 #include "VMTranslator.h"
+#include "helper.h"
 
 using namespace std;
 
@@ -316,10 +317,11 @@ string VMTranslator::vm_not()
 }
 
 /** Generate Hack Assembly code for a VM label operation */
-string VMTranslator::vm_label(string label){
-    string out;
-    out += label + "\t";
-	return out;
+string VMTranslator::vm_label(string label)
+{
+    Filestr out;
+	out.ins(	"("+label+")", "new label: "+label	);
+	return out.str();
 }
 
 /** Generate Hack Assembly code for a VM goto operation */
