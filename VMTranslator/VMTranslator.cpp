@@ -5,6 +5,16 @@
 
 using namespace std;
 
+string VMTranslator::moduleName = "defMod"; // default module name
+
+string VMTranslator::fnLabelEncode(string name) {
+	return "FUNC."+moduleName+"."+name;
+}
+
+string VMTranslator::fnLabelEncode(string modName, string name) {
+	return "FUNC."+modName+"."+name;
+}
+
 /**
  * VMTranslator constructor
  */
@@ -331,6 +341,8 @@ string VMTranslator::vm_goto(string label)
     // __a += in +"\n";
     out.ins("@" + label,"jump to" + label);
     out.ins("0;JMP");
+
+    return out.str();
 }
 
 /** Generate Hack Assembly code for a VM if-goto operation */
@@ -351,8 +363,8 @@ string VMTranslator::vm_if(string label)
 string VMTranslator::vm_function(string function_name, int n_vars)
 {
     helper out;
-    string fLabel = "FUNC."+moduleName+"."+name;
-	// string fLabel = fnLabelEncode(function_name); // manually use "def" as the module name
+    // string fLabel = "FUNC."+moduleName+"."+ function_name;
+	string fLabel = fnLabelEncode(function_name); // manually use "def" as the module name
 
 	out.ins( "("+fLabel+")", "function declaration: "+function_name+" "+to_string(n_vars) );
 	out.ins(	"@SP	");

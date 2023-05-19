@@ -10,6 +10,7 @@ class VMTranslator {
     public:
 
         VMTranslator();
+        VMTranslator(string moduleName);
         ~VMTranslator();
 
         static string vm_push(string segment, int offset);
@@ -33,7 +34,12 @@ class VMTranslator {
         static string vm_function(string function_name, int n_vars);
         static string vm_call(string function_name, int n_args);
         static string vm_return();
+
+
+        static string fnLabelEncode(string name);
+        static string fnLabelEncode(string modName, string name);
         
+        static string moduleName;
 };
 
 #endif /* VMTRANSLATOR_H */
