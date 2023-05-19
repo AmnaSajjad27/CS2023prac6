@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 
-struct Filestr {
+struct helper {
   std::string __a;
 
   inline void ins(const std::string &in) {

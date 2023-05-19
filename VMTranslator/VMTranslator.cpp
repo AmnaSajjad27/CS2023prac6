@@ -319,24 +319,57 @@ string VMTranslator::vm_not()
 /** Generate Hack Assembly code for a VM label operation */
 string VMTranslator::vm_label(string label)
 {
-    Filestr out;
+    helper out;
 	out.ins(	"("+label+")", "new label: "+label	);
 	return out.str();
 }
 
 /** Generate Hack Assembly code for a VM goto operation */
-string VMTranslator::vm_goto(string label){
-    return "";
+string VMTranslator::vm_goto(string label)
+{
+    helper out;
+    // __a += in +"\n";
+    out.ins("@" + label,"jump to" + label);
+    out.ins("0;JMP");
 }
 
 /** Generate Hack Assembly code for a VM if-goto operation */
-string VMTranslator::vm_if(string label){
-    return "";
+string VMTranslator::vm_if(string label)
+{
+    helper out;
+
+	out.ins("@SP", "if-goto " + label);
+	out.ins("AM=M-1");
+	out.ins("D=M");
+	out.ins("@"+label);
+	out.ins("D;JNE");
+
+	return out.str();
 }
 
 /** Generate Hack Assembly code for a VM function operation */
-string VMTranslator::vm_function(string function_name, int n_vars){
-    return "";
+string VMTranslator::vm_function(string function_name, int n_vars)
+{
+    helper out;
+    string fLabel = "FUNC."+moduleName+"."+name;
+	// string fLabel = fnLabelEncode(function_name); // manually use "def" as the module name
+
+	out.ins( "("+fLabel+")", "function declaration: "+function_name+" "+to_string(n_vars) );
+	out.ins(	"@SP	");
+	out.ins(	"A=M	");
+
+	out.comment("clearing the stack for function: "+function_name);
+	for (int i=0; i<n_vars; i++) {
+		out.ins(	"M=0"			);
+		out.ins(	"A=A+1"		);
+	}
+	out.comment("finished clearing");
+
+	out.ins(	"D=A"		);
+	out.ins(	"@SP"		);
+	out.ins(	"M=D"		);
+
+	return out.str();
 }
 
 /** Generate Hack Assembly code for a VM call operation */
