@@ -1,79 +1,156 @@
-// Calculates a = x*y
-// a is a local variable
-// x & y are static variables
+push static 0
+push constant 0
+eq
 
-// if either x or y is zero, a will be zero
+if-goto RETURN_0
+
+push static 1
+push constant 0
+eq
+
+if-goto RETURN_0
+
+//----------------------------------
+    // Counts number of -ve's
+// Check if x is -ve:
 push constant 0
 push static 0
-eq
-if-goto EQUAL
+lt
+if-goto RETURN_NO1
 
-label EQUAL
+    // If x is negative
+// TEMP[0] STORES NUMBER OF -VE'S
+push temp 0             
+push constant 1
+add
+pop temp 0
+
+push static 0           // Inverting x if it is negative
+not
+push constant 1
+add
+pop temp 1              // Setting Temp[1] = +ve x ONLY
+
+label POSITIVE_X
+
+
+
+// Check if y is -ve:
+push constant 0
+push static 1
+lt
+if-goto RETURN_NO2
+
+    // Iterates Temp[0] by 1; COUNTING NUM OF -VE'S
+push temp 0             
+push constant 1
+add
+pop temp 0     
+
+push static 1           // Inverting y if it is negative
+not
+push constant 1
+add
+pop temp 2              // Setting Temp[2] = +ve y ONLY
+
+
+label POSITIVE_Y
+
+
+
+//----------------------------------
+
+push temp 1
+push temp 2
+lt                          // Returns 0 if y > x
+
+if-goto X_SMALLER            
+    // ELSE, Y_SMALLER
+push temp 2
+pop temp 3
+push temp 1
+pop temp 4
+
+//---------------------------------
+// Start of calculations:
+// Temp[0] = # -ve's; Temp[1] = +ve x, Temp[2] = +ve y; Temp[3] = +ve MIN; Temp[4] = +ve MAX; Temp[5] = counter; Temp[6] = sum
+label START_CALC
+
+push constant 0
+pop temp 5              // Stores counter
+push constant 0
+pop temp 6              // Stores sum
+
+label START_LOOP
+    // If we have iterated enough times, i == smallVal
+push temp 5
+push temp 3
+eq
+
+if-goto ENDLOOP
+
+push temp 4             // Sums once 
+push temp 6 
+add
+pop temp 6
+
+
+push temp 5             // Iterate +1
+push constant 1
+add
+pop temp 5
+
+goto START_LOOP
+label ENDLOOP
+
+push constant 1
+push temp 0
+eq
+if-goto ONE_NEG
+
+
+push temp 6
+pop local 0
+push constant 0
+pop temp 0              // RESET NEGATIVE COUNTER
+
+
+label END
+goto END
+
+
+
+
+
+label X_SMALLER
+push temp 1
+pop temp 3
+push temp 2
+pop temp 4
+goto START_CALC
+
+label ONE_NEG
+push temp 6
+neg
+
+pop local 0
+
+push constant 0
+pop temp 0              // RESET NEGATIVE COUNTER
+goto END
+
+
+label RETURN_NO1
+push static 0           // Setting Temp[1] = +ve x ONLY   
+pop temp 1
+goto POSITIVE_X
+
+label RETURN_NO2
+push static 1           // Setting Temp[2] = +ve y ONLY   
+pop temp 2
+goto POSITIVE_Y
+
+label RETURN_0
 push constant 0
 pop local 0
 goto END
-
-// if x or y is neagtive 
-// absolute it, add it then negate it and pop it 
-// check less than 
-
-push constant 0
-push static 0
-lt
-if-goto LOOP_NEG_X
-
-push constant 0
-push static 1
-lt
-if-goto LOOP_NEG_Y
-
-
-
-label LOOP_NEG_X
-// abs it 
-push static 0
-neg
-pop static 0
-
-
-label LOOP_NEG_Y
-push static 1
-neg
-pop static 1
-
-
-
-// repeated addition in a loop
-
-push temp 0
-pop local 0
-
-label LOOP_START
-// if y <= 0
-
-push static 1
-push temp 0
-lt
-if-goto END
-
-// result + static 0
-push local 0
-push static 0
-add
-
-// result = result + static 0
-pop local 0
-
-// y = y - 1 
-push static 1
-push temp 1
-sub
-pop static 1
-
-// continoue next iteriation
-goto LOOP_START
-
-label END
-push local 0
-pop local 0
-// goto END
