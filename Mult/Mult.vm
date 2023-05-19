@@ -1,125 +1,96 @@
 push static 0
 push constant 0
 eq
-
 if-goto RETURN_0
 
 push static 1
 push constant 0
 eq
-
 if-goto RETURN_0
 
-//----------------------------------
-    // Counts number of -ve's
-// Check if x is -ve:
 push constant 0
 push static 0
 lt
 if-goto RETURN_NO1
 
-    // If x is negative
-// TEMP[0] STORES NUMBER OF -VE'S
 push temp 0             
 push constant 1
 add
 pop temp 0
-
-push static 0           // Inverting x if it is negative
+push static 0           
 not
 push constant 1
 add
-pop temp 1              // Setting Temp[1] = +ve x ONLY
-
+pop temp 1              
 label POSITIVE_X
 
-
-
-// Check if y is -ve:
+// y neg?
 push constant 0
 push static 1
 lt
 if-goto RETURN_NO2
 
-    // Iterates Temp[0] by 1; COUNTING NUM OF -VE'S
 push temp 0             
 push constant 1
 add
 pop temp 0     
-
-push static 1           // Inverting y if it is negative
+//negate arg y
+push static 1           
 not
 push constant 1
 add
-pop temp 2              // Setting Temp[2] = +ve y ONLY
-
+pop temp 2              
 
 label POSITIVE_Y
-
-
-
-//----------------------------------
-
 push temp 1
 push temp 2
-lt                          // Returns 0 if y > x
-
+lt                          
 if-goto X_SMALLER            
-    // ELSE, Y_SMALLER
+// if y smaller
 push temp 2
 pop temp 3
 push temp 1
 pop temp 4
 
-//---------------------------------
-// Start of calculations:
-// Temp[0] = # -ve's; Temp[1] = +ve x, Temp[2] = +ve y; Temp[3] = +ve MIN; Temp[4] = +ve MAX; Temp[5] = counter; Temp[6] = sum
 label START_CALC
-
 push constant 0
-pop temp 5              // Stores counter
+// counter index
+pop temp 5              
 push constant 0
-pop temp 6              // Stores sum
+// running sum
+pop temp 6              
 
 label START_LOOP
-    // If we have iterated enough times, i == smallVal
 push temp 5
 push temp 3
 eq
-
 if-goto ENDLOOP
-
-push temp 4             // Sums once 
+push temp 4             
 push temp 6 
 add
 pop temp 6
 
-
-push temp 5             // Iterate +1
+// iteriate the loop and go again in confition satisfied
+push temp 5             
 push constant 1
 add
 pop temp 5
 
 goto START_LOOP
-label ENDLOOP
 
+label ENDLOOP
 push constant 1
 push temp 0
 eq
 if-goto ONE_NEG
 
-
 push temp 6
 pop local 0
 push constant 0
-pop temp 0              // RESET NEGATIVE COUNTER
-
+pop temp 0             
 
 label END
 goto END
-
-
-
 
 
 label X_SMALLER
@@ -136,17 +107,17 @@ neg
 pop local 0
 
 push constant 0
-pop temp 0              // RESET NEGATIVE COUNTER
+pop temp 0              
 goto END
 
 
 label RETURN_NO1
-push static 0           // Setting Temp[1] = +ve x ONLY   
+push static 0           
 pop temp 1
 goto POSITIVE_X
 
 label RETURN_NO2
-push static 1           // Setting Temp[2] = +ve y ONLY   
+push static 1           
 pop temp 2
 goto POSITIVE_Y
 
